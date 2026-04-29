@@ -68,11 +68,11 @@ void loop() {}
 
 | Board | node_id | MAC Address |
 |---|---|---|
-| ESP32 #1 (gateway) | 1 | `XX:XX:XX:XX:XX:XX` ← replace |
-| ESP32 #2 | 2 | `XX:XX:XX:XX:XX:XX` ← replace |
-| ESP32 #3 | 3 | `XX:XX:XX:XX:XX:XX` ← replace |
-| ESP32 #4 | 4 | `XX:XX:XX:XX:XX:XX` ← replace |
-| ESP32 #5 | 5 | `XX:XX:XX:XX:XX:XX` ← replace |
+| ESP32 #1 (gateway) | 1 | `FF:FF:FF:FF:FF:FF` ← replace |
+| ESP32 #2 | 2 | `FF:FF:FF:FF:FF:FF` ← replace |
+| ESP32 #3 | 3 | `FF:FF:FF:FF:FF:FF` ← replace |
+| ESP32 #4 | 4 | `FF:FF:FF:FF:FF:FF` ← replace |
+| ESP32 #5 | 5 | `FF:FF:FF:FF:FF:FF` ← replace |
 
 ---
 
@@ -108,7 +108,7 @@ Take the first IP shown (e.g. `192.168.1.42`). In
 const char* MQTT_BROKER = "192.168.1.42";   // replace with real Jetson IP
 ```
 
-**Jetson IP (fill in when known):** `___.___.___.___ `
+**Jetson IP (fill in when known):** `192.168.1.50`
 
 ---
 

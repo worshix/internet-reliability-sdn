@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 update_config.py --jetson-ip 192.168.1.99 --gateway AA:BB:CC:11:22:33 --node2 AA:BB:CC:11:22:44)",
+      "Bash(python3 update_config.py --jetson-ip 192.168.1.50 --gateway 11:22:33:44:55:66 --node2 AA:BB:CC:DD:EE:02 --node3 AA:BB:CC:DD:EE:03 --node4 AA:BB:CC:DD:EE:04 --node5 AA:BB:CC:DD:EE:05)",
+      "Bash(python3 update_config.py --jetson-ip 192.168.X.X --gateway FF:FF:FF:FF:FF:FF --node2 FF:FF:FF:FF:FF:FF --node3 FF:FF:FF:FF:FF:FF --node4 FF:FF:FF:FF:FF:FF --node5 FF:FF:FF:FF:FF:FF)",
+      "Bash(python3 update_config.py --gateway FF:FF:FF:FF:FF:FF --node2 FF:FF:FF:FF:FF:FF --node3 FF:FF:FF:FF:FF:FF --node4 FF:FF:FF:FF:FF:FF --node5 FF:FF:FF:FF:FF:FF)"
+    ]
+  }
+}
