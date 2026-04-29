@@ -301,3 +301,9 @@ Sensor node (×4)                    Gateway (×1)
 ---
 
 *Last updated: Phase 1 firmware written — awaiting MAC address discovery.*
+
+gateway MAC: 30:76:F5:A6:AD:4C
+node_1 MAC: B4:BF:E9:33:A5:60
+node_2 MAC: D4:E9:F4:C5:3E:54
+node_3 MAC: E0:8C:FE:31:EB:0C
+node_4 MAC: D4:E9:F4:C4:40:BC
