@@ -36,8 +36,8 @@
 
 - [x] Sensor node firmware written (node_1 – node_4)
 - [x] Gateway firmware written
-- [ ] **Step 1:** Get MAC addresses from all 5 boards
-- [ ] **Step 2:** Update MAC addresses in all firmware files
+- [x] **Step 1:** Get MAC addresses from all 5 boards
+- [x] **Step 2:** Update MAC addresses in all firmware files
 - [ ] **Step 3:** Find Jetson IP and update gateway firmware
 - [ ] **Step 4:** Install Arduino libraries on your machine
 - [ ] **Step 5:** Flash all 5 boards
@@ -68,11 +68,11 @@ void loop() {}
 
 | Board | node_id | MAC Address |
 |---|---|---|
-| ESP32 #1 (gateway) | 1 | `FF:FF:FF:FF:FF:FF` ← replace |
-| ESP32 #2 | 2 | `FF:FF:FF:FF:FF:FF` ← replace |
-| ESP32 #3 | 3 | `FF:FF:FF:FF:FF:FF` ← replace |
-| ESP32 #4 | 4 | `FF:FF:FF:FF:FF:FF` ← replace |
-| ESP32 #5 | 5 | `FF:FF:FF:FF:FF:FF` ← replace |
+| ESP32 #1 (gateway) | 1 | `30:76:F5:A6:AD:4C` |
+| ESP32 #2 | 2 | `B4:BF:E9:33:A5:60` |
+| ESP32 #3 | 3 | `D4:E9:F4:C5:3E:54` |
+| ESP32 #4 | 4 | `E0:8C:FE:31:EB:0C` |
+| ESP32 #5 | 5 | `D4:E9:F4:C4:40:BC` |
 
 ---
 
@@ -300,10 +300,4 @@ Sensor node (×4)                    Gateway (×1)
 
 ---
 
-*Last updated: Phase 1 firmware written — awaiting MAC address discovery.*
-
-gateway MAC: 30:76:F5:A6:AD:4C
-node_1 MAC: B4:BF:E9:33:A5:60
-node_2 MAC: D4:E9:F4:C5:3E:54
-node_3 MAC: E0:8C:FE:31:EB:0C
-node_4 MAC: D4:E9:F4:C4:40:BC
+*Last updated: Steps 1 & 2 complete — MAC addresses recorded and flashed into all firmware. Next: get Jetson IP (Step 3), install libraries (Step 4), flash boards (Step 5).*
