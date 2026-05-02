@@ -8,11 +8,11 @@ Usage (interactive — prompts for each value, Enter to keep current):
 
 Usage (non-interactive — supply any combination of flags):
     python3 update_config.py --jetson-ip 192.168.1.42
-    python3 update_config.py --gateway AA:BB:CC:DD:EE:FF --node2 AA:BB:CC:DD:EE:FF
+    python3 update_config.py --gateway AA:BB:CC:DD:EE:FF --node1 AA:BB:CC:DD:EE:FF
     python3 update_config.py --jetson-ip 192.168.1.42 \
-        --gateway AA:BB:CC:DD:EE:FF --node2 AA:BB:CC:DD:EE:FF \
-        --node3   AA:BB:CC:DD:EE:FF --node4 AA:BB:CC:DD:EE:FF \
-        --node5   AA:BB:CC:DD:EE:FF
+        --gateway AA:BB:CC:DD:EE:FF --node1 AA:BB:CC:DD:EE:FF \
+        --node2   AA:BB:CC:DD:EE:FF --node3 AA:BB:CC:DD:EE:FF \
+        --node4   AA:BB:CC:DD:EE:FF
 """
 
 import re
@@ -26,10 +26,10 @@ ESP_DIR = os.path.join(ROOT, "esp32")
 
 INO_FILES = {
     "gateway": os.path.join(ESP_DIR, "gateway", "gateway.ino"),
-    "node2":   os.path.join(ESP_DIR, "node_1",  "node_1.ino"),
-    "node3":   os.path.join(ESP_DIR, "node_2",  "node_2.ino"),
-    "node4":   os.path.join(ESP_DIR, "node_3",  "node_3.ino"),
-    "node5":   os.path.join(ESP_DIR, "node_4",  "node_4.ino"),
+    "node1":   os.path.join(ESP_DIR, "node_1",  "node_1.ino"),
+    "node2":   os.path.join(ESP_DIR, "node_2",  "node_2.ino"),
+    "node3":   os.path.join(ESP_DIR, "node_3",  "node_3.ino"),
+    "node4":   os.path.join(ESP_DIR, "node_4",  "node_4.ino"),
 }
 README = os.path.join(ROOT, "README.md")
 
@@ -122,10 +122,10 @@ def main():
     parser = argparse.ArgumentParser(description="ZAN firmware config updater")
     parser.add_argument("--jetson-ip", metavar="IP")
     parser.add_argument("--gateway",   metavar="MAC")
+    parser.add_argument("--node1",     metavar="MAC")
     parser.add_argument("--node2",     metavar="MAC")
     parser.add_argument("--node3",     metavar="MAC")
     parser.add_argument("--node4",     metavar="MAC")
-    parser.add_argument("--node5",     metavar="MAC")
     args = parser.parse_args()
 
     interactive = not any(vars(args).values())
@@ -135,16 +135,16 @@ def main():
     readme   = read_file(README)
 
     # gather current values
-    # GATEWAY_MAC only lives in sensor node files; all other MACs live in gateway
+    # GATEWAY_MAC only lives in sensor node files; sensor node MACs live in gateway
     gw  = contents["gateway"]
-    n2  = contents["node2"]
+    n1  = contents["node1"]
     cur = {
         "jetson_ip": current_ip(gw),
-        "gateway":   current_mac(n2,  "GATEWAY_MAC"),   # node files know gw MAC
-        "node2":     current_mac(gw,  "NODE2_MAC"),
-        "node3":     current_mac(gw,  "NODE3_MAC"),
-        "node4":     current_mac(gw,  "NODE4_MAC"),
-        "node5":     current_mac(gw,  "NODE5_MAC"),
+        "gateway":   current_mac(n1, "GATEWAY_MAC"),   # node files know gw MAC
+        "node1":     current_mac(gw, "NODE1_MAC"),
+        "node2":     current_mac(gw, "NODE2_MAC"),
+        "node3":     current_mac(gw, "NODE3_MAC"),
+        "node4":     current_mac(gw, "NODE4_MAC"),
     }
 
     print("\n── ZAN Config Updater ───────────────────────────────")
@@ -153,24 +153,24 @@ def main():
         try:
             new_ip  = prompt("Jetson IP        ", cur["jetson_ip"], validate_ip)
             new_gw  = prompt("Gateway MAC (#1) ", cur["gateway"])
+            new_n1  = prompt("Node1 MAC   (#1) ", cur["node1"])
             new_n2  = prompt("Node2 MAC   (#2) ", cur["node2"])
             new_n3  = prompt("Node3 MAC   (#3) ", cur["node3"])
             new_n4  = prompt("Node4 MAC   (#4) ", cur["node4"])
-            new_n5  = prompt("Node5 MAC   (#5) ", cur["node5"])
         except KeyboardInterrupt:
             print("\nCancelled.")
             sys.exit(0)
     else:
         new_ip = validate_ip(args.jetson_ip) if args.jetson_ip else None
         new_gw = args.gateway
+        new_n1 = args.node1
         new_n2 = args.node2
         new_n3 = args.node3
         new_n4 = args.node4
-        new_n5 = args.node5
 
     # validate MACs if supplied via flags (interactive already validated via prompt)
-    mac_args = {"gateway": new_gw, "node2": new_n2, "node3": new_n3,
-                "node4": new_n4, "node5": new_n5}
+    mac_args = {"gateway": new_gw, "node1": new_n1, "node2": new_n2,
+                "node3": new_n3, "node4": new_n4}
     if not interactive:
         for key, val in mac_args.items():
             if val:
@@ -179,10 +179,10 @@ def main():
     changes = {
         "jetson_ip": new_ip,
         "gateway":   new_gw,
+        "node1":     new_n1,
         "node2":     new_n2,
         "node3":     new_n3,
         "node4":     new_n4,
-        "node5":     new_n5,
     }
 
     if not any(changes.values()):
@@ -194,19 +194,19 @@ def main():
     # MAC variable name in each .ino file
     mac_vars = {
         "gateway": "GATEWAY_MAC",
+        "node1":   "NODE1_MAC",
         "node2":   "NODE2_MAC",
         "node3":   "NODE3_MAC",
         "node4":   "NODE4_MAC",
-        "node5":   "NODE5_MAC",
     }
 
     # README board labels (must match text in README)
     readme_labels = {
         "gateway": "ESP32 #1 (gateway)",
+        "node1":   "ESP32 #1",
         "node2":   "ESP32 #2",
         "node3":   "ESP32 #3",
         "node4":   "ESP32 #4",
-        "node5":   "ESP32 #5",
     }
 
     # update every .ino file

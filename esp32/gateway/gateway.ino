@@ -28,15 +28,15 @@
 // ================================================================
 //  WIFI CONFIGURATION
 // ================================================================
-const char* WIFI_SSID     = "internet-sdn";
-const char* WIFI_PASSWORD = "internet-sdn";
+const char* WIFI_SSID     = "internetSdn";
+const char* WIFI_PASSWORD = "internetSdn";
 
 // ================================================================
 //  MQTT CONFIGURATION
 //  Set MQTT_BROKER to the Jetson TX2's IP address on your network.
 //  To find it: run  hostname -I  in a terminal on the Jetson.
 // ================================================================
-const char* MQTT_BROKER    = "192.168.1.50";   // <-- UPDATE THIS
+const char* MQTT_BROKER    = "10.127.239.85";
 const int   MQTT_PORT      = 1883;
 const char* MQTT_CLIENT_ID = "zan_gateway";
 
@@ -45,10 +45,10 @@ const char* MQTT_CLIENT_ID = "zan_gateway";
 //  Run the MAC-discovery sketch on each board first (see README).
 //  Replace the placeholder bytes below with the real MAC addresses.
 // ================================================================
-uint8_t NODE2_MAC[6] = {0xB4, 0xBF, 0xE9, 0x33, 0xA5, 0x60};
-uint8_t NODE3_MAC[6] = {0xD4, 0xE9, 0xF4, 0xC5, 0x3E, 0x54};
-uint8_t NODE4_MAC[6] = {0xE0, 0x8C, 0xFE, 0x31, 0xEB, 0x0C};
-uint8_t NODE5_MAC[6] = {0xD4, 0xE9, 0xF4, 0xC4, 0x40, 0xBC};
+uint8_t NODE1_MAC[6] = {0xB4, 0xBF, 0xE9, 0x33, 0xA5, 0x60};
+uint8_t NODE2_MAC[6] = {0xD4, 0xE9, 0xF4, 0xC5, 0x3E, 0x54};
+uint8_t NODE3_MAC[6] = {0xE0, 0x8C, 0xFE, 0x31, 0xEB, 0x0C};
+uint8_t NODE4_MAC[6] = {0xD4, 0xE9, 0xF4, 0xC4, 0x40, 0xBC};
 
 // ================================================================
 //  PACKET DEFINITION  (must match sensor node firmware exactly)
@@ -132,7 +132,7 @@ void connectMQTT() {
 //  PUBLISH
 // ================================================================
 void publishTelemetry(const TelemetryPkt *pkt) {
-    // topic: zan/telemetry/esp32_02 … esp32_05
+    // topic: zan/telemetry/esp32_01 … esp32_04
     char topic[48];
     snprintf(topic, sizeof(topic), "zan/telemetry/esp32_0%d", pkt->src_node);
 
@@ -188,7 +188,7 @@ void setup() {
     peer_info.channel = 0;
     peer_info.encrypt = false;
 
-    uint8_t *macs[] = {NODE2_MAC, NODE3_MAC, NODE4_MAC, NODE5_MAC};
+    uint8_t *macs[] = {NODE1_MAC, NODE2_MAC, NODE3_MAC, NODE4_MAC};
     for (int i = 0; i < 4; i++) {
         memcpy(peer_info.peer_addr, macs[i], 6);
         esp_now_add_peer(&peer_info);

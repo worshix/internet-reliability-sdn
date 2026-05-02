@@ -1,6 +1,6 @@
 /*
  * ZAN — Zimbabwe Adaptive Network
- * Sensor Node Firmware  |  ESP32 #5  (node_id = 5)
+ * Sensor Node Firmware  |  ESP32 #4  (node_id = 4)
  *
  * Responsibilities:
  *   - Ping every peer node via ESP-NOW every 2 s to measure RTT
@@ -18,7 +18,13 @@
 // ================================================================
 //  NODE CONFIGURATION
 // ================================================================
-#define THIS_NODE_ID  5   // unique ID for this board (5 = ESP32 #5)
+#define THIS_NODE_ID  4   // unique ID for this board (4 = ESP32 #4)
+
+// ================================================================
+//  WIFI CONFIGURATION
+// ================================================================
+#define WIFI_SSID     "internetSdn"
+#define WIFI_PASSWORD "internetSdn"
 
 // ================================================================
 //  MAC ADDRESSES
@@ -26,10 +32,10 @@
 //  Replace the placeholder bytes below with the real MAC addresses.
 // ================================================================
 uint8_t GATEWAY_MAC[6] = {0x30, 0x76, 0xF5, 0xA6, 0xAD, 0x4C};
-uint8_t NODE2_MAC[6]   = {0xB4, 0xBF, 0xE9, 0x33, 0xA5, 0x60};
-uint8_t NODE3_MAC[6]   = {0xD4, 0xE9, 0xF4, 0xC5, 0x3E, 0x54};
-uint8_t NODE4_MAC[6]   = {0xE0, 0x8C, 0xFE, 0x31, 0xEB, 0x0C};
-uint8_t NODE5_MAC[6]   = {0xD4, 0xE9, 0xF4, 0xC4, 0x40, 0xBC};
+uint8_t NODE1_MAC[6]   = {0xB4, 0xBF, 0xE9, 0x33, 0xA5, 0x60};
+uint8_t NODE2_MAC[6]   = {0xD4, 0xE9, 0xF4, 0xC5, 0x3E, 0x54};
+uint8_t NODE3_MAC[6]   = {0xE0, 0x8C, 0xFE, 0x31, 0xEB, 0x0C};
+uint8_t NODE4_MAC[6]   = {0xD4, 0xE9, 0xF4, 0xC4, 0x40, 0xBC};
 
 // ================================================================
 //  TIMING
@@ -93,10 +99,10 @@ static int       peer_count = 0;
 
 void buildPeerList() {
     struct { uint8_t id; uint8_t *mac; } all[] = {
+        {1, NODE1_MAC},
         {2, NODE2_MAC},
         {3, NODE3_MAC},
         {4, NODE4_MAC},
-        {5, NODE5_MAC},
     };
     peer_count = 0;
     for (int i = 0; i < 4; i++) {
@@ -234,6 +240,24 @@ void sendTelemetry() {
 }
 
 // ================================================================
+//  WIFI
+// ================================================================
+void connectWiFi() {
+    Serial.printf("[ZAN] Connecting to WiFi: %s\n", WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    for (int i = 0; i < 20 && WiFi.status() != WL_CONNECTED; i++) {
+        delay(500);
+        Serial.print(".");
+    }
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.printf("\n[ZAN] WiFi connected  IP=%s  ch=%d\n",
+                      WiFi.localIP().toString().c_str(), WiFi.channel());
+    } else {
+        Serial.println("\n[ZAN] WiFi not connected — ESP-NOW channel may mismatch");
+    }
+}
+
+// ================================================================
 //  SETUP
 // ================================================================
 void setup() {
@@ -242,7 +266,7 @@ void setup() {
     Serial.printf("\n[ZAN] Sensor node %d starting\n", THIS_NODE_ID);
 
     WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
+    connectWiFi();
     Serial.printf("[ZAN] MAC: %s\n", WiFi.macAddress().c_str());
 
     if (esp_now_init() != ESP_OK) {
