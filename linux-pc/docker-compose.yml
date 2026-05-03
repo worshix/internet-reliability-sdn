@@ -1,0 +1,8 @@
+services:
+  controller:
+    build: ./controller
+    container_name: zan-controller
+    network_mode: host
+    volumes:
+      - ./controller/app:/app
+    restart: unless-stopped
