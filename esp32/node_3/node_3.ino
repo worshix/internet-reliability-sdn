@@ -220,8 +220,11 @@ void sendTelemetry() {
                        ? (int8_t)(p.rssi_sum / p.rssi_count)
                        : -127;
 
-        tel.packet_loss_pct =
-            (float)(p.pings_sent - p.pongs_received) / p.pings_sent;
+        uint32_t sent = p.pings_sent;
+        uint32_t rcvd = p.pongs_received;
+        tel.packet_loss_pct = (rcvd <= sent)
+                             ? (float)(sent - rcvd) / sent
+                             : 0.0f;
 
         tel.uptime_s = millis() / 1000;
 
