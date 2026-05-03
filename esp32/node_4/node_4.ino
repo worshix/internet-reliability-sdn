@@ -129,7 +129,7 @@ int peerIdxById(uint8_t id) {
 // ================================================================
 //  ESP-NOW CALLBACKS
 // ================================================================
-void onDataSent(const uint8_t *mac, esp_now_send_status_t status) {}
+void onDataSent(const wifi_tx_info_t *tx_info, esp_now_send_status_t status) {}
 
 void onDataRecv(const esp_now_recv_info_t *recv_info,
                 const uint8_t *data, int len) {
