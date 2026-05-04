@@ -156,6 +156,11 @@ class ZANSubscriber:
             "nodes": nodes,
             "confidence": round(confidence, 4),
         }
+        # Publish to MQTT so the dashboard receives it in real time
+        if self._client:
+            import json as _json
+            self._client.publish("zan/insights", _json.dumps(payload), qos=1)
+
         url = "{}/zan/insight".format(LINUX_PC_URL)
         try:
             resp = requests.post(url, json=payload, timeout=5)

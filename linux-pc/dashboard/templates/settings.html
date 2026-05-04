@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="row mt-2 mb-4">
+  <div class="col">
+    <h5 class="zan-page-title">
+      <i class="bi bi-gear-fill me-2"></i>Settings
+    </h5>
+  </div>
+</div>
+
+<form method="POST" action="{{ url_for('settings') }}">
+  <div class="row g-4">
+
+    <!-- MQTT Broker -->
+    <div class="col-12 col-lg-6">
+      <div class="zan-card">
+        <div class="zan-card-header">
+          <i class="bi bi-cloud-arrow-up me-2"></i>MQTT Broker
+        </div>
+        <div class="zan-card-body">
+          <div class="mb-3">
+            <label class="zan-label" for="mqtt_broker">
+              Broker IP / Hostname
+            </label>
+            <input type="text" id="mqtt_broker" name="mqtt_broker"
+                   class="form-control zan-input"
+                   value="{{ s.mqtt_broker }}"
+                   placeholder="e.g. 192.168.1.50 (Jetson WiFi IP)">
+            <div class="form-text zan-text-muted">
+              This is the WiFi IP of your Jetson TX2 running Mosquitto.
+            </div>
+          </div>
+          <div class="mb-0">
+            <label class="zan-label" for="mqtt_port">Port</label>
+            <input type="number" id="mqtt_port" name="mqtt_port"
+                   class="form-control zan-input"
+                   value="{{ s.mqtt_port }}" min="1" max="65535">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controller -->
+    <div class="col-12 col-lg-6">
+      <div class="zan-card">
+        <div class="zan-card-header">
+          <i class="bi bi-diagram-3-fill me-2"></i>SDN Controller
+        </div>
+        <div class="zan-card-body">
+          <div class="mb-3">
+            <label class="zan-label" for="controller_url">Controller REST URL</label>
+            <input type="text" id="controller_url" name="controller_url"
+                   class="form-control zan-input"
+                   value="{{ s.controller_url }}"
+                   placeholder="http://localhost:8080">
+            <div class="form-text zan-text-muted">
+              Used by the Jetson to POST anomaly insights for rerouting.
+            </div>
+          </div>
+          <div class="mb-0">
+            <label class="zan-label" for="anomaly_threshold">
+              Anomaly Confidence Threshold
+              <span class="zan-text-muted">(0.0 – 1.0)</span>
+            </label>
+            <input type="number" id="anomaly_threshold" name="anomaly_threshold"
+                   class="form-control zan-input"
+                   value="{{ s.anomaly_threshold }}"
+                   min="0" max="1" step="0.05">
+            <div class="form-text zan-text-muted">
+              Readings above this confidence score trigger an alert and reroute.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin -->
+    <div class="col-12 col-lg-6">
+      <div class="zan-card">
+        <div class="zan-card-header">
+          <i class="bi bi-person-lock me-2"></i>Admin Account
+        </div>
+        <div class="zan-card-body">
+          <p class="zan-text-muted small mb-3">
+            Leave the password field empty to keep the current password unchanged.
+          </p>
+          <div class="mb-0">
+            <label class="zan-label" for="new_password">New Password</label>
+            <input type="password" id="new_password" name="new_password"
+                   class="form-control zan-input"
+                   placeholder="Leave blank to keep current">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save -->
+    <div class="col-12">
+      <button type="submit" class="btn zan-btn-primary px-5">
+        <i class="bi bi-floppy me-2"></i>Save Settings
+      </button>
+      <span class="zan-text-muted ms-3 small">
+        MQTT will reconnect automatically after saving.
+      </span>
+    </div>
+
+  </div>
+</form>
+{% endblock %}

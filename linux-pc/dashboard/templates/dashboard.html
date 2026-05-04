@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- ── Health banner ─────────────────────────────────────────────────────── -->
+<div class="row g-0 mb-3 mt-2">
+  <div class="col">
+    <div id="health-banner" class="zan-health-banner {% if state.healthy %}zan-healthy{% else %}zan-degraded{% endif %}">
+      <span id="health-icon">
+        {% if state.healthy %}<i class="bi bi-shield-check"></i>{% else %}<i class="bi bi-exclamation-triangle-fill"></i>{% endif %}
+      </span>
+      <span id="health-text">
+        {% if state.healthy %}Network Healthy{% else %}Anomaly Detected{% endif %}
+      </span>
+      <span class="ms-auto zan-health-meta">
+        <i class="bi bi-clock me-1"></i><span id="last-update">—</span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stat cards ────────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3">
+    <div class="zan-stat-card">
+      <div class="zan-stat-icon"><i class="bi bi-cpu"></i></div>
+      <div class="zan-stat-value" id="stat-nodes">{{ state.nodes|length }}</div>
+      <div class="zan-stat-label">Active Nodes</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="zan-stat-card">
+      <div class="zan-stat-icon"><i class="bi bi-diagram-3"></i></div>
+      <div class="zan-stat-value" id="stat-links">{{ state.links|length }}</div>
+      <div class="zan-stat-label">Active Links</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="zan-stat-card">
+      <div class="zan-stat-icon text-warning"><i class="bi bi-exclamation-circle"></i></div>
+      <div class="zan-stat-value" id="stat-alerts">{{ state.insights|length }}</div>
+      <div class="zan-stat-label">AI Alerts</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="zan-stat-card">
+      <div class="zan-stat-icon text-success"><i class="bi bi-arrow-down-up"></i></div>
+      <div class="zan-stat-value" id="stat-packets">0</div>
+      <div class="zan-stat-label">Readings/min</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Gauges ─────────────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="zan-card">
+      <div class="zan-card-header">
+        <i class="bi bi-speedometer2 me-2"></i>Network Metrics — Live
+      </div>
+      <div class="zan-card-body">
+        <div class="row g-4 justify-content-center">
+          <div class="col-auto text-center">
+            <canvas data-type="radial-gauge"
+              data-width="180" data-height="180"
+              data-min-value="0" data-max-value="150"
+              data-value="0" data-id="gauge-latency"
+              data-title="Latency" data-units="ms"
+              data-major-ticks="0,30,60,90,120,150"
+              data-minor-ticks="5"
+              data-stroke-ticks="true"
+              data-highlights='[{"from":0,"to":30,"color":"rgba(76,175,80,0.35)"},{"from":30,"to":80,"color":"rgba(245,193,24,0.35)"},{"from":80,"to":150,"color":"rgba(244,67,54,0.35)"}]'
+              data-color-plate="#1e1e1e"
+              data-color-major-ticks="#e0e0e0"
+              data-color-minor-ticks="#555"
+              data-color-title="#F5C518"
+              data-color-units="#aaa"
+              data-color-numbers="#e0e0e0"
+              data-color-needle-start="rgba(245,193,24,1)"
+              data-color-needle-end="rgba(245,193,24,0.9)"
+              data-value-box="true"
+              data-animation-duration="500"
+              data-animation-rule="linear"></canvas>
+            <div class="zan-gauge-label">Avg Latency</div>
+          </div>
+          <div class="col-auto text-center">
+            <canvas data-type="radial-gauge"
+              data-width="180" data-height="180"
+              data-min-value="-90" data-max-value="-10"
+              data-value="-50" data-id="gauge-rssi"
+              data-title="RSSI" data-units="dBm"
+              data-major-ticks="-90,-70,-55,-40,-25,-10"
+              data-minor-ticks="5"
+              data-stroke-ticks="true"
+              data-highlights='[{"from":-90,"to":-55,"color":"rgba(244,67,54,0.35)"},{"from":-55,"to":-35,"color":"rgba(245,193,24,0.35)"},{"from":-35,"to":-10,"color":"rgba(76,175,80,0.35)"}]'
+              data-color-plate="#1e1e1e"
+              data-color-major-ticks="#e0e0e0"
+              data-color-minor-ticks="#555"
+              data-color-title="#F5C518"
+              data-color-units="#aaa"
+              data-color-numbers="#e0e0e0"
+              data-color-needle-start="rgba(245,193,24,1)"
+              data-color-needle-end="rgba(245,193,24,0.9)"
+              data-value-box="true"
+              data-animation-duration="500"
+              data-animation-rule="linear"></canvas>
+            <div class="zan-gauge-label">Avg RSSI</div>
+          </div>
+          <div class="col-auto text-center">
+            <canvas data-type="linear-gauge"
+              data-width="120" data-height="200"
+              data-min-value="0" data-max-value="100"
+              data-value="0" data-id="gauge-loss"
+              data-title="Pkt Loss" data-units="%"
+              data-major-ticks="0,20,40,60,80,100"
+              data-minor-ticks="4"
+              data-stroke-ticks="true"
+              data-highlights='[{"from":0,"to":10,"color":"rgba(76,175,80,0.4)"},{"from":10,"to":40,"color":"rgba(245,193,24,0.4)"},{"from":40,"to":100,"color":"rgba(244,67,54,0.4)"}]'
+              data-color-plate="#1e1e1e"
+              data-color-major-ticks="#e0e0e0"
+              data-color-minor-ticks="#555"
+              data-color-title="#F5C518"
+              data-color-units="#aaa"
+              data-color-numbers="#e0e0e0"
+              data-color-needle-start="rgba(245,193,24,1)"
+              data-color-needle-end="rgba(245,193,24,0.9)"
+              data-value-box="true"
+              data-animation-duration="500"
+              data-animation-rule="linear"></canvas>
+            <div class="zan-gauge-label">Packet Loss</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Node cards ─────────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="zan-card-header-standalone">
+      <i class="bi bi-cpu-fill me-2"></i>Node Status
+    </div>
+  </div>
+  {% for node_id in ['esp32_01','esp32_02','esp32_03','esp32_04'] %}
+  {% set nd = state.nodes.get(node_id, {}) %}
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="zan-node-card" id="node-card-{{ node_id }}">
+      <div class="zan-node-header">
+        <span class="zan-node-name"><i class="bi bi-wifi me-1"></i>{{ node_id }}</span>
+        <span class="zan-node-badge {% if nd %}zan-badge-online{% else %}zan-badge-waiting{% endif %}"
+              id="badge-{{ node_id }}">
+          {{ 'Live' if nd else 'Waiting' }}
+        </span>
+      </div>
+      <div class="zan-node-metrics">
+        <div class="zan-metric">
+          <span class="zan-metric-label">Latency</span>
+          <span class="zan-metric-value" id="{{ node_id }}-lat">
+            {{ '%.1f ms'|format(nd.latency_ms) if nd else '—' }}
+          </span>
+        </div>
+        <div class="zan-metric">
+          <span class="zan-metric-label">RSSI</span>
+          <span class="zan-metric-value" id="{{ node_id }}-rssi">
+            {{ '%d dBm'|format(nd.rssi_dbm) if nd else '—' }}
+          </span>
+        </div>
+        <div class="zan-metric">
+          <span class="zan-metric-label">Pkt Loss</span>
+          <span class="zan-metric-value" id="{{ node_id }}-loss">
+            {{ '%.1f%%'|format(nd.packet_loss_pct * 100) if nd else '—' }}
+          </span>
+        </div>
+        <div class="zan-metric">
+          <span class="zan-metric-label">Uptime</span>
+          <span class="zan-metric-value" id="{{ node_id }}-uptime">
+            {{ '%ds'|format(nd.uptime_s) if nd else '—' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ── Charts ─────────────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-3">
+  <div class="col-12 col-xl-7">
+    <div class="zan-card">
+      <div class="zan-card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-graph-up me-2"></i>Latency Trend</span>
+        <select id="link-select" class="zan-select form-select form-select-sm w-auto">
+          <option value="">— select link —</option>
+        </select>
+      </div>
+      <div class="zan-card-body">
+        <canvas id="chart-latency" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-xl-5">
+    <div class="zan-card">
+      <div class="zan-card-header">
+        <i class="bi bi-reception-4 me-2"></i>RSSI Trend
+      </div>
+      <div class="zan-card-body">
+        <canvas id="chart-rssi" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI Alerts ──────────────────────────────────────────────────────────── -->
+<div class="row g-3">
+  <div class="col-12">
+    <div class="zan-card">
+      <div class="zan-card-header">
+        <i class="bi bi-robot me-2"></i>AI Anomaly Alerts
+      </div>
+      <div class="zan-card-body p-0">
+        <div id="alerts-container">
+          {% if state.insights %}
+            {% for ins in state.insights | reverse %}
+            <div class="zan-alert-row">
+              <span class="zan-alert-type zan-type-{{ ins.type|lower|replace('_','-') }}">
+                {{ ins.type }}
+              </span>
+              <span class="zan-alert-nodes">
+                <i class="bi bi-link-45deg"></i>
+                {{ ins.nodes|join(' ↔ ') if ins.nodes else '—' }}
+              </span>
+              <span class="zan-alert-conf">
+                conf {{ '%.2f'|format(ins.confidence) }}
+              </span>
+              <span class="zan-alert-time">{{ ins.received_at or '—' }}</span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="zan-no-alerts">
+              <i class="bi bi-shield-check me-2"></i>No anomalies detected
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>ZAN.initDashboard();</script>
+{% endblock %}

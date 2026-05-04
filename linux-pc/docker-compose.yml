@@ -6,3 +6,18 @@ services:
     volumes:
       - ./controller/app:/app
     restart: unless-stopped
+
+  dashboard:
+    build: ./dashboard
+    container_name: zan-dashboard
+    network_mode: host
+    environment:
+      - SECRET_KEY=zan-change-this-in-production
+      - DB_PATH=/data/zan.db
+    volumes:
+      - ./dashboard:/app
+      - zan-db:/data
+    restart: unless-stopped
+
+volumes:
+  zan-db:

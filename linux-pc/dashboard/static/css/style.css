@@ -1,0 +1,282 @@
+/* ── Base ────────────────────────────────────────────────────────────────── */
+:root {
+  --zan-yellow:   #F5C518;
+  --zan-yellow-d: #c49a12;
+  --zan-bg:       #0f0f0f;
+  --zan-surface:  #1a1a1a;
+  --zan-surface2: #222222;
+  --zan-border:   #2e2e2e;
+  --zan-text:     #e4e4e4;
+  --zan-muted:    #888;
+  --zan-green:    #4caf50;
+  --zan-red:      #f44336;
+  --zan-orange:   #ff9800;
+}
+
+body {
+  background: var(--zan-bg);
+  color: var(--zan-text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* ── Navbar ──────────────────────────────────────────────────────────────── */
+.zan-navbar {
+  background: var(--zan-surface);
+  border-bottom: 2px solid var(--zan-yellow);
+  padding: 0.5rem 0;
+}
+
+.zan-brand {
+  color: var(--zan-yellow) !important;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+}
+
+.zan-navbar .nav-link {
+  color: var(--zan-muted) !important;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.zan-navbar .nav-link:hover { color: var(--zan-text) !important; background: var(--zan-surface2); }
+.zan-active { color: var(--zan-yellow) !important; background: rgba(245,197,24,0.08) !important; }
+
+.zan-user-label  { color: var(--zan-muted); font-size: 0.85rem; }
+.zan-text-muted  { color: var(--zan-muted) !important; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.zan-btn-sm {
+  background: var(--zan-surface2);
+  color: var(--zan-yellow);
+  border: 1px solid var(--zan-border);
+  border-radius: 6px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.zan-btn-sm:hover { background: var(--zan-border); color: var(--zan-yellow); }
+
+.zan-btn-primary {
+  background: var(--zan-yellow);
+  color: #111;
+  border: none;
+  border-radius: 6px;
+  padding: 0.55rem 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.zan-btn-primary:hover { background: var(--zan-yellow-d); color: #111; transform: translateY(-1px); }
+
+/* ── Forms ───────────────────────────────────────────────────────────────── */
+.zan-input {
+  background: var(--zan-surface2) !important;
+  border: 1px solid var(--zan-border) !important;
+  color: var(--zan-text) !important;
+  border-radius: 6px !important;
+}
+.zan-input:focus {
+  border-color: var(--zan-yellow) !important;
+  box-shadow: 0 0 0 3px rgba(245,197,24,0.15) !important;
+  outline: none !important;
+}
+.zan-input::placeholder { color: var(--zan-muted) !important; }
+
+.zan-label { color: var(--zan-muted); font-size: 0.82rem; font-weight: 500; margin-bottom: 0.3rem; display: block; }
+
+.zan-select {
+  background: var(--zan-surface2) !important;
+  border: 1px solid var(--zan-border) !important;
+  color: var(--zan-text) !important;
+  border-radius: 6px !important;
+  font-size: 0.82rem;
+}
+.zan-select:focus { border-color: var(--zan-yellow) !important; box-shadow: none !important; }
+.zan-select option { background: var(--zan-surface2); }
+
+/* ── Alerts ──────────────────────────────────────────────────────────────── */
+.zan-alert-success { background: rgba(76,175,80,0.1);  border: 1px solid #4caf50; color: #a5d6a7; border-radius: 6px; padding: 0.75rem 1rem; }
+.zan-alert-danger  { background: rgba(244,67,54,0.1);  border: 1px solid #f44336; color: #ef9a9a; border-radius: 6px; padding: 0.75rem 1rem; }
+.zan-alert-warning { background: rgba(245,197,24,0.1); border: 1px solid var(--zan-yellow); color: var(--zan-yellow); border-radius: 6px; padding: 0.75rem 1rem; }
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.zan-card {
+  background: var(--zan-surface);
+  border: 1px solid var(--zan-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.zan-card-header {
+  background: var(--zan-surface2);
+  border-bottom: 1px solid var(--zan-border);
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--zan-yellow);
+}
+.zan-card-body { padding: 1.25rem; }
+.zan-card-header-standalone {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--zan-muted);
+  padding: 0 0.25rem;
+  margin-bottom: -0.5rem;
+}
+
+/* ── Health banner ───────────────────────────────────────────────────────── */
+.zan-health-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: 1px solid;
+}
+.zan-healthy  { background: rgba(76,175,80,0.12); border-color: #4caf50; color: #81c784; }
+.zan-degraded { background: rgba(244,67,54,0.12); border-color: #f44336; color: #ef9a9a; animation: zan-pulse-red 2s infinite; }
+.zan-health-meta { color: var(--zan-muted); font-size: 0.8rem; font-weight: 400; }
+
+@keyframes zan-pulse-red {
+  0%, 100% { border-color: #f44336; }
+  50% { border-color: #ff6659; box-shadow: 0 0 10px rgba(244,67,54,0.3); }
+}
+
+/* ── Stat cards ──────────────────────────────────────────────────────────── */
+.zan-stat-card {
+  background: var(--zan-surface);
+  border: 1px solid var(--zan-border);
+  border-radius: 10px;
+  padding: 1.2rem;
+  text-align: center;
+}
+.zan-stat-icon { font-size: 1.5rem; color: var(--zan-yellow); margin-bottom: 0.4rem; }
+.zan-stat-value { font-size: 1.8rem; font-weight: 700; color: var(--zan-text); line-height: 1; }
+.zan-stat-label { font-size: 0.75rem; color: var(--zan-muted); margin-top: 0.3rem; }
+
+/* ── MQTT badge ──────────────────────────────────────────────────────────── */
+.zan-badge-online  { background: rgba(76,175,80,0.15);  color: #81c784; border: 1px solid #4caf50; border-radius: 20px; padding: 0.2rem 0.75rem; font-size: 0.78rem; font-weight: 600; }
+.zan-badge-offline { background: rgba(244,67,54,0.12); color: #ef9a9a; border: 1px solid #f44336; border-radius: 20px; padding: 0.2rem 0.75rem; font-size: 0.78rem; font-weight: 600; }
+.zan-badge-waiting { background: rgba(136,136,136,0.12); color: var(--zan-muted); border: 1px solid var(--zan-border); border-radius: 20px; padding: 0.15rem 0.6rem; font-size: 0.72rem; font-weight: 600; }
+
+/* ── Node cards ──────────────────────────────────────────────────────────── */
+.zan-node-card {
+  background: var(--zan-surface);
+  border: 1px solid var(--zan-border);
+  border-radius: 10px;
+  padding: 1rem;
+  transition: border-color 0.3s;
+}
+.zan-node-card.zan-node-live   { border-color: var(--zan-yellow); }
+.zan-node-card.zan-node-alert  { border-color: var(--zan-red);    box-shadow: 0 0 8px rgba(244,67,54,0.25); }
+
+.zan-node-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+.zan-node-name { font-weight: 600; font-size: 0.9rem; color: var(--zan-yellow); }
+
+.zan-node-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.zan-metric { background: var(--zan-surface2); border-radius: 6px; padding: 0.5rem 0.7rem; }
+.zan-metric-label { display: block; font-size: 0.68rem; color: var(--zan-muted); margin-bottom: 0.1rem; }
+.zan-metric-value { display: block; font-size: 0.95rem; font-weight: 600; color: var(--zan-text); }
+
+/* ── Gauge labels ────────────────────────────────────────────────────────── */
+.zan-gauge-label { margin-top: 0.5rem; font-size: 0.8rem; color: var(--zan-muted); font-weight: 500; }
+
+/* ── Charts ──────────────────────────────────────────────────────────────── */
+canvas#chart-latency, canvas#chart-rssi { max-height: 220px; }
+
+/* ── AI alert rows ───────────────────────────────────────────────────────── */
+.zan-alert-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  border-bottom: 1px solid var(--zan-border);
+  font-size: 0.85rem;
+  animation: zan-fade-in 0.3s ease;
+}
+.zan-alert-row:last-child { border-bottom: none; }
+.zan-alert-type {
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  min-width: 130px;
+  text-align: center;
+}
+.zan-type-link-failure     { background: rgba(244,67,54,0.15); color: #ef9a9a; border: 1px solid #f44336; }
+.zan-type-rf-interference  { background: rgba(255,152,0,0.15); color: #ffcc80; border: 1px solid #ff9800; }
+.zan-type-congestion       { background: rgba(245,197,24,0.15); color: var(--zan-yellow); border: 1px solid var(--zan-yellow); }
+.zan-type-link-degradation { background: rgba(33,150,243,0.15); color: #90caf9; border: 1px solid #2196f3; }
+.zan-type-node-failure     { background: rgba(244,67,54,0.2); color: #ef5350; border: 1px solid #c62828; }
+
+.zan-alert-nodes { color: var(--zan-text); flex: 1; }
+.zan-alert-conf  { color: var(--zan-muted); font-size: 0.78rem; }
+.zan-alert-time  { color: var(--zan-muted); font-size: 0.75rem; white-space: nowrap; }
+.zan-no-alerts   { padding: 1.5rem; text-align: center; color: var(--zan-muted); }
+
+/* ── Log table ───────────────────────────────────────────────────────────── */
+.zan-log-container {
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+  border-radius: 10px;
+}
+.zan-log-table { font-size: 0.78rem; color: var(--zan-text); margin: 0; }
+.zan-log-thead th {
+  background: var(--zan-surface2);
+  color: var(--zan-yellow);
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-color: var(--zan-border);
+  padding: 0.6rem 0.85rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.zan-log-table td {
+  border-color: var(--zan-border);
+  padding: 0.4rem 0.85rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.zan-log-table tr:hover td { background: var(--zan-surface2); }
+.zan-log-raw { color: var(--zan-muted); font-family: monospace; font-size: 0.7rem; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.zan-log-stats { font-size: 0.82rem; color: var(--zan-muted); }
+
+/* ── Login page ──────────────────────────────────────────────────────────── */
+.zan-login-body { background: var(--zan-bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.zan-login-wrapper { width: 100%; max-width: 400px; padding: 1.5rem; }
+.zan-login-card {
+  background: var(--zan-surface);
+  border: 1px solid var(--zan-border);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+.zan-login-logo { font-size: 3rem; color: var(--zan-yellow); margin-bottom: 0.5rem; }
+.zan-login-title { font-size: 1.5rem; font-weight: 700; color: var(--zan-yellow); margin-bottom: 0.25rem; }
+.zan-login-subtitle { font-size: 0.82rem; color: var(--zan-muted); margin-bottom: 1.75rem; }
+.zan-login-card .zan-label { text-align: left; }
+.zan-login-card .zan-input { text-align: left; }
+
+/* ── Page title ──────────────────────────────────────────────────────────── */
+.zan-page-title { color: var(--zan-yellow); font-weight: 600; font-size: 1rem; }
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--zan-surface); }
+::-webkit-scrollbar-thumb { background: var(--zan-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--zan-muted); }
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes zan-fade-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }

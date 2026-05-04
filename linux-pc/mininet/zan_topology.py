@@ -99,7 +99,7 @@ def build():
     # Switch <-> switch links: TCLink for bandwidth/delay shaping
     net.addLink(s1, s2, cls=TCLink, bw=10, delay='5ms')
     net.addLink(s2, s3, cls=TCLink, bw=10, delay='8ms')
-    # net.addLink(s1, s3, cls=TCLink, bw=5,  delay='10ms')   # redundant — comment out for now
+    net.addLink(s1, s3, cls=TCLink, bw=5,  delay='10ms')
     net.addLink(s3, s4, cls=TCLink, bw=8,  delay='6ms')
     net.addLink(s4, s5, cls=TCLink, bw=5,  delay='4ms')
     # net.addLink(s1, s5, cls=TCLink, bw=8,  delay='7ms')    # redundant — comment out for now
