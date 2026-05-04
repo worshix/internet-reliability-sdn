@@ -46,55 +46,55 @@ class ZANController(app_manager.OSKenApp):
         )
         datapath.send_msg(mod)
 
-@set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
-def packet_in_handler(self, ev):
-    msg = ev.msg
-    datapath = msg.datapath
-    ofproto = datapath.ofproto
-    parser = datapath.ofproto_parser
-    in_port = msg.match['in_port']
+    @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
+    def packet_in_handler(self, ev):
+        msg = ev.msg
+        datapath = msg.datapath
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+        in_port = msg.match['in_port']
 
-    pkt = packet.Packet(msg.data)
-    eth = pkt.get_protocols(ethernet.ethernet)[0]
+        pkt = packet.Packet(msg.data)
+        eth = pkt.get_protocols(ethernet.ethernet)[0]
 
-    # Filter noise
-    if eth.ethertype == 0x88cc:  # LLDP
-        return
-    if eth.dst.startswith('33:33:'):  # IPv6 multicast
-        return
+        # Filter noise
+        if eth.ethertype == 0x88cc:  # LLDP
+            return
+        if eth.dst.startswith('33:33:'):  # IPv6 multicast
+            return
 
-    dpid = datapath.id
-    self.mac_to_port.setdefault(dpid, {})
+        dpid = datapath.id
+        self.mac_to_port.setdefault(dpid, {})
 
-    # Learn — but only update if this is a more recent observation.
-    # In a topology with loops, the same src MAC arrives via multiple ports;
-    # we trust the first port we see and don't keep flapping.
-    if eth.src not in self.mac_to_port[dpid]:
-        self.mac_to_port[dpid][eth.src] = in_port
+        # Learn — but only update if this is a more recent observation.
+        # In a topology with loops, the same src MAC arrives via multiple ports;
+        # we trust the first port we see and don't keep flapping.
+        if eth.src not in self.mac_to_port[dpid]:
+            self.mac_to_port[dpid][eth.src] = in_port
 
-    # Decide output
-    if eth.dst in self.mac_to_port[dpid]:
-        out_port = self.mac_to_port[dpid][eth.dst]
-    else:
-        out_port = ofproto.OFPP_FLOOD
+        # Decide output
+        if eth.dst in self.mac_to_port[dpid]:
+            out_port = self.mac_to_port[dpid][eth.dst]
+        else:
+            out_port = ofproto.OFPP_FLOOD
 
-    # CRITICAL: never send a packet back out the port it came in on
-    if out_port == in_port:
-        return  # drop silently — it's a loop
+        # CRITICAL: never send a packet back out the port it came in on
+        if out_port == in_port:
+            return  # drop silently — it's a loop
 
-    actions = [parser.OFPActionOutput(out_port)]
+        actions = [parser.OFPActionOutput(out_port)]
 
-    # Install flow only when we have a known destination
-    if out_port != ofproto.OFPP_FLOOD:
-        match = parser.OFPMatch(in_port=in_port, eth_dst=eth.dst, eth_src=eth.src)
-        self._add_flow(datapath, priority=1, match=match,
-                       actions=actions, idle_timeout=30)
+        # Install flow only when we have a known destination
+        if out_port != ofproto.OFPP_FLOOD:
+            match = parser.OFPMatch(in_port=in_port, eth_dst=eth.dst, eth_src=eth.src)
+            self._add_flow(datapath, priority=1, match=match,
+                           actions=actions, idle_timeout=30)
 
-    out = parser.OFPPacketOut(
-        datapath=datapath,
-        buffer_id=ofproto.OFP_NO_BUFFER,
-        in_port=in_port,
-        actions=actions,
-        data=msg.data,
-    )
-    datapath.send_msg(out)
+        out = parser.OFPPacketOut(
+            datapath=datapath,
+            buffer_id=msg.buffer_id,
+            in_port=in_port,
+            actions=actions,
+            data=msg.data,
+        )
+        datapath.send_msg(out)
