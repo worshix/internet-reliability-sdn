@@ -1,0 +1,54 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0.18
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    restart: unless-stopped
+
+  inference-api:
+    build: ./inference-api
+    runtime: nvidia
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mosquitto
+    environment:
+      - MQTT_BROKER=mosquitto
+      - MQTT_PORT=1883
+      - LINUX_PC_URL=${LINUX_PC_URL:-http://192.168.1.20:8080}
+      - ANOMALY_THRESHOLD=${ANOMALY_THRESHOLD:-0.75}
+      - WINDOW_SIZE=${WINDOW_SIZE:-30}
+      - MODEL_PATH=/models/isolation_forest.pkl
+      - DATASET_PATH=/models/dataset.csv
+      - NODE_TIMEOUT_S=${NODE_TIMEOUT_S:-20}
+    volumes:
+      - ./inference-api/app:/app
+      - ./models:/models
+      - ./dataset.csv:/models/dataset.csv:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/zan/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  telemetry-logger:
+    build: ./telemetry-logger
+    depends_on:
+      - mosquitto
+    environment:
+      - MQTT_BROKER=mosquitto
+      - MQTT_PORT=1883
+      - LOG_DIR=/logs
+    volumes:
+      - ./logs:/logs
+    restart: unless-stopped
+
+volumes:
+  mosquitto-data:
+  mosquitto-log:
