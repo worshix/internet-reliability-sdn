@@ -16,4 +16,4 @@ COPY app/ /app/
 
 EXPOSE 6653 8080
 
-CMD ["os-ken-manager", "--ofp-tcp-listen-port", "6653", "zan_controller"]
+CMD ["python", "-m", "os_ken.cmd.manager", "--ofp-tcp-listen-port=6653", "--verbose", "/app/zan_controller.py"]

@@ -64,14 +64,10 @@ def build():
     net.addLink(s4, s5, bw=5,  delay='4ms')   # Masvingo-Gweru spur
     net.addLink(s1, s5, bw=8,  delay='7ms')   # Harare-Gweru direct
 
-    net.build()
-    c0.start()
-    for s in [s1, s2, s3, s4, s5]:
-        s.start([c0])
+    net.start()
 
     CLI(net)
     net.stop()
-
 
 if __name__ == '__main__':
     setLogLevel('info')
