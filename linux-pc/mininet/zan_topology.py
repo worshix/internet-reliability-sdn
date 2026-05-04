@@ -2,11 +2,62 @@
 """
 ZAN Mininet topology — mirrors the 5-ESP32 physical layout.
 """
+import subprocess
 from mininet.net import Mininet
 from mininet.node import RemoteController, OVSSwitch
 from mininet.link import TCLink, Link
 from mininet.cli import CLI
-from mininet.log import setLogLevel
+from mininet.log import setLogLevel, info, warn
+
+
+def setup_qos(net):
+    """Configure OVS HTB queues on every inter-switch port.
+
+    Creates 4 queues per port matching the AQoSRM traffic classes:
+      Queue 0 — VoIP        min-rate 1 Mbps  (guaranteed)
+      Queue 1 — Video       min-rate 1 Mbps  (guaranteed)
+      Queue 2 — Interactive min-rate 500 kbps (guaranteed)
+      Queue 3 — Bulk        max-rate 2 Mbps  (rate-capped; tightened by AQoSRM meters)
+    """
+    info('*** Setting up QoS queues on inter-switch ports\n')
+    for link in net.links:
+        n1, n2 = link.intf1.node, link.intf2.node
+        if not (isinstance(n1, OVSSwitch) and isinstance(n2, OVSSwitch)):
+            continue
+        for intf in (link.intf1, link.intf2):
+            port = intf.name
+            cmd = (
+                f'ovs-vsctl set port {port} qos=@newqos '
+                f'-- --id=@newqos create QoS type=linux-htb '
+                f'queues:0=@q0 queues:1=@q1 queues:2=@q2 queues:3=@q3 '
+                f'-- --id=@q0 create Queue other-config:min-rate=1000000 '
+                f'-- --id=@q1 create Queue other-config:min-rate=1000000 '
+                f'-- --id=@q2 create Queue other-config:min-rate=500000 '
+                f'-- --id=@q3 create Queue other-config:max-rate=2000000'
+            )
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            if result.returncode != 0:
+                warn(f'[QoS] Could not configure {port}: {result.stderr.strip()}\n')
+            else:
+                info(f'[QoS] 4 queues configured on {port}\n')
+
+
+def cleanup_qos(net):
+    """Remove OVS QoS configuration from all inter-switch ports."""
+    info('*** Cleaning up QoS queues\n')
+    for link in net.links:
+        n1, n2 = link.intf1.node, link.intf2.node
+        if not (isinstance(n1, OVSSwitch) and isinstance(n2, OVSSwitch)):
+            continue
+        for intf in (link.intf1, link.intf2):
+            port = intf.name
+            subprocess.run(
+                f'ovs-vsctl destroy QoS [$(ovs-vsctl get port {port} qos)] 2>/dev/null; '
+                f'ovs-vsctl clear port {port} qos',
+                shell=True, capture_output=True,
+            )
+    subprocess.run('ovs-vsctl --all destroy QoS; ovs-vsctl --all destroy Queue',
+                   shell=True, capture_output=True)
 
 
 def build():
@@ -52,9 +103,13 @@ def build():
     net.addLink(s3, s4, cls=TCLink, bw=8,  delay='6ms')
     net.addLink(s4, s5, cls=TCLink, bw=5,  delay='4ms')
     # net.addLink(s1, s5, cls=TCLink, bw=8,  delay='7ms')    # redundant — comment out for now
+
     net.start()
+    setup_qos(net)
 
     CLI(net)
+
+    cleanup_qos(net)
     net.stop()
 
 
