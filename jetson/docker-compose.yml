@@ -1,4 +1,4 @@
-version: "3.8"
+version: "2.4"
 
 services:
   mosquitto:
@@ -13,7 +13,6 @@ services:
 
   inference-api:
     build: ./inference-api
-    runtime: nvidia
     ports:
       - "8000:8000"
     depends_on:
