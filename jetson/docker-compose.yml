@@ -1,4 +1,4 @@
-version: "2.4"
+version: "3.3"
 
 services:
   mosquitto:
@@ -30,12 +30,6 @@ services:
       - ./inference-api/app:/app
       - ./models:/models
       - ./dataset.csv:/models/dataset.csv:ro
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/zan/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
     restart: unless-stopped
 
   telemetry-logger:
