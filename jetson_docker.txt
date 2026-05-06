@@ -1,0 +1,10 @@
+mashoko@mashoko-desktop:~/internet-reliability-sdn/jetson$ docker ps -a
+CONTAINER ID   IMAGE                      COMMAND                  CREATED       STATUS                   PORTS                                       NAMES
+1ac091ddcd25   jetson_inference-api       "python3 -m uvicorn …"   2 hours ago   Up 2 hours               0.0.0.0:8000->8000/tcp, :::8000->8000/tcp   jetson_inference-api_1
+2b753210f6fa   jetson_telemetry-logger    "python3 logger.py"      2 hours ago   Up 2 hours                                                           jetson_telemetry-logger_1
+1bafae78e0a8   eclipse-mosquitto:2.0.18   "/docker-entrypoint.…"   2 hours ago   Up 2 hours               0.0.0.0:1883->1883/tcp, :::1883->1883/tcp   jetson_mosquitto_1
+6b2b68ba7232   780048f73b7d               "/bin/sh -c 'pip ins…"   3 hours ago   Exited (1) 3 hours ago                                               gracious_ganguly
+dfd9c4005d27   780048f73b7d               "/bin/sh -c 'pip ins…"   4 hours ago   Exited (2) 3 hours ago                                               eloquent_bhabha
+dfedd16e9393   780048f73b7d               "/bin/sh -c 'pip ins…"   4 hours ago   Exited (2) 4 hours ago                                               hardcore_wu
+c24c3c9beb3d   780048f73b7d               "/bin/sh -c 'pip ins…"   7 hours ago   Exited (2) 7 hours ago                                               silly_booth
+
