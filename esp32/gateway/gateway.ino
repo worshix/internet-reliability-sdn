@@ -36,7 +36,7 @@ const char* WIFI_PASSWORD = "internetSdn";
 //  Set MQTT_BROKER to the Jetson TX2's IP address on your network.
 //  To find it: run  hostname -I  in a terminal on the Jetson.
 // ================================================================
-const char* MQTT_BROKER    = "10.127.239.85";
+const char* MQTT_BROKER    = "10.172.211.12";
 const int   MQTT_PORT      = 1883;
 const char* MQTT_CLIENT_ID = "zan_gateway";
 
