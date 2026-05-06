@@ -114,6 +114,7 @@ def _on_message(client, userdata, msg):
             _state["insights"] = (_state["insights"] + [insight])[-20:]
             _state["healthy"] = False
         socketio.emit("insight", insight)
+        threading.Thread(target=_emit_sdn_update, daemon=True).start()
         return
 
     node_id = payload.get("node_id")
@@ -164,6 +165,17 @@ def start_mqtt():
     t = threading.Thread(target=_mqtt_loop, args=(broker, port, _mqtt_thread_stop), daemon=True)
     t.start()
     logger.info("MQTT thread started → %s:%d", broker, port)
+
+
+def _emit_sdn_update():
+    """Fetch SDN status from controller and push to all Socket.IO clients."""
+    ctrl = get_setting("controller_url", "http://localhost:8080")
+    try:
+        with urllib.request.urlopen(f"{ctrl}/zan/network-status", timeout=2) as r:
+            data = json.loads(r.read())
+        socketio.emit("sdn_update", data)
+    except Exception:
+        pass
 
 
 def restart_mqtt():

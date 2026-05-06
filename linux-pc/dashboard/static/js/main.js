@@ -268,6 +268,17 @@ const ZAN = (() => {
   }
 
   // ── Insight (AI alert) ────────────────────────────────────────────────────
+  function flashAffectedSwitches(degradedLinks) {
+    const affected = new Set();
+    degradedLinks.forEach(pair => { affected.add(pair[0]); affected.add(pair[1]); });
+    affected.forEach(dpid => {
+      const el = document.getElementById(`sw-${dpid}`);
+      if (!el) return;
+      el.classList.add('zan-sw-rerouting');
+      setTimeout(() => el.classList.remove('zan-sw-rerouting'), 2000);
+    });
+  }
+
   function applyInsight(ins) {
     const container = document.getElementById('alerts-container');
     if (!container) return;
@@ -277,15 +288,54 @@ const ZAN = (() => {
     if (ph) ph.remove();
 
     const typeClass = (ins.type || 'unknown').toLowerCase().replace(/_/g, '-');
+    const hasNodes  = (ins.nodes || []).length === 2;
+    const rerouteBadge = hasNodes
+      ? `<span class="zan-reroute-badge"><i class="bi bi-arrow-repeat me-1"></i>Rerouting…</span>`
+      : '';
+
     const row = document.createElement('div');
     row.className = 'zan-alert-row';
     row.innerHTML = `
       <span class="zan-alert-type zan-type-${typeClass}">${ins.type || '?'}</span>
       <span class="zan-alert-nodes"><i class="bi bi-link-45deg"></i> ${(ins.nodes || []).join(' ↔ ')}</span>
       <span class="zan-alert-conf">conf ${(ins.confidence || 0).toFixed(2)}</span>
+      ${rerouteBadge}
       <span class="zan-alert-time">${new Date().toLocaleTimeString()}</span>
     `;
     container.prepend(row);
+
+    // Upgrade badge after 1.5 s — gives controller time to log all rapid-fire insights
+    if (hasNodes) {
+      const badge = row.querySelector('.zan-reroute-badge');
+      const nodes = ins.nodes || [];
+      setTimeout(() => {
+        fetch('/api/sdn-status')
+          .then(r => r.json())
+          .then(data => {
+            const recent = data.recent_insights || [];
+            const match  = recent.find(r =>
+              Array.isArray(r.nodes) && r.nodes.length === 2 &&
+              r.nodes.some(n => n === nodes[0]) &&
+              r.nodes.some(n => n === nodes[1])
+            );
+            const confirmed = !!(match && match.rerouted === true);
+            if (badge) {
+              badge.innerHTML = confirmed
+                ? '<i class="bi bi-check-circle-fill me-1"></i>Rerouted'
+                : '<i class="bi bi-exclamation-circle me-1"></i>Reroute attempted';
+              badge.className = confirmed
+                ? 'zan-reroute-badge zan-reroute-ok'
+                : 'zan-reroute-badge zan-reroute-warn';
+            }
+          })
+          .catch(() => {
+            if (badge) {
+              badge.textContent = 'Status unknown';
+              badge.className = 'zan-reroute-badge zan-reroute-warn';
+            }
+          });
+      }, 1500);
+    }
 
     // Cap at 20
     const rows = container.querySelectorAll('.zan-alert-row');
@@ -340,6 +390,7 @@ const ZAN = (() => {
   socket.on('mqtt_status',  d  => setMqttBadge(d.connected));
   socket.on('telemetry',    d  => applyTelemetry(d));
   socket.on('insight',      d  => applyInsight(d));
+  socket.on('sdn_update',   d  => { updateSdnPanel(d); flashAffectedSwitches(d.degraded_links || []); });
 
   // ── Log page ──────────────────────────────────────────────────────────────
   let logCount   = 0;

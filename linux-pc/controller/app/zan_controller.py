@@ -93,8 +93,8 @@ class ZANRestHandler(BaseHTTPRequestHandler):
             except Exception:
                 self._json(400, {'error': 'invalid JSON'})
                 return
-            self.zan_app.handle_insight(data)
-            self._json(200, {'status': 'ok'})
+            result = self.zan_app.handle_insight(data)
+            self._json(200, result)
         elif self.path == '/zan/clear-degraded':
             self.zan_app.degraded_links.clear()
             self._json(200, {'status': 'cleared'})
@@ -191,8 +191,8 @@ class ZANController(app_manager.OSKenApp):
             "AI INSIGHT [%s] nodes=%s conf=%.3f", insight_type, nodes, confidence
         )
 
-        # Keep a rolling log
-        self.insight_log = (self.insight_log + [body])[-50:]
+        rerouted = False
+        affected_dpids = []
 
         if len(nodes) == 2:
             link_key = frozenset(nodes)
@@ -200,8 +200,14 @@ class ZANController(app_manager.OSKenApp):
                 dpid_a, dpid_b = LINK_MAP[link_key]
                 self.degraded_links.add(frozenset({dpid_a, dpid_b}))
                 self._reroute(dpid_a, dpid_b)
+                rerouted = True
+                affected_dpids = [dpid_a, dpid_b]
             else:
                 self.logger.warning("Insight nodes %s not in LINK_MAP", nodes)
+
+        enriched = {**body, 'rerouted': rerouted, 'affected_dpids': affected_dpids}
+        self.insight_log = (self.insight_log + [enriched])[-50:]
+        return {'status': 'ok', 'rerouted': rerouted, 'affected_dpids': affected_dpids}
 
     def _reroute(self, dpid_a, dpid_b):
         """Clear flows on the two endpoints so traffic re-learns around the bad link."""
@@ -217,7 +223,7 @@ class ZANController(app_manager.OSKenApp):
         return {
             'connected_switches': list(self.datapaths.keys()),
             'degraded_links': [list(lnk) for lnk in self.degraded_links],
-            'recent_insights': self.insight_log[-10:],
+            'recent_insights': self.insight_log[-50:],
             'mac_table': {str(dpid): list(macs.keys())
                           for dpid, macs in self.mac_to_port.items()},
         }

@@ -313,6 +313,38 @@ canvas#chart-latency, canvas#chart-rssi { max-height: 220px; }
   margin-bottom: 0.4rem;
 }
 
+/* ── Reroute badge (inside AI alert rows) ────────────────────────────────── */
+.zan-reroute-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(245,197,24,0.12);
+  border: 1px solid var(--zan-yellow);
+  color: var(--zan-yellow);
+  white-space: nowrap;
+  animation: zan-spin-icon 1s linear infinite;
+}
+.zan-reroute-ok   { background: rgba(76,175,80,0.12);  border-color: #4caf50; color: #81c784; animation: none; }
+.zan-reroute-warn { background: rgba(255,152,0,0.12);  border-color: #ff9800; color: #ffcc80; animation: none; }
+
+@keyframes zan-spin-icon {
+  from { opacity: 1; }
+  50%  { opacity: 0.4; }
+  to   { opacity: 1; }
+}
+
+/* ── Switch badge rerouting flash ────────────────────────────────────────── */
+.zan-sw-rerouting {
+  animation: zan-reroute-flash 0.4s ease 5 !important;
+}
+@keyframes zan-reroute-flash {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 12px 3px rgba(245,197,24,0.6); border-color: var(--zan-yellow); color: var(--zan-yellow); }
+}
+
 /* ── Gauge canvas — fixed size so they don't stretch on value update ─────── */
 canvas[data-type="radial-gauge"]  { display: block; width: 180px !important; height: 180px !important; }
 canvas[data-type="linear-gauge"]  { display: block; width: 120px !important; height: 200px !important; }
