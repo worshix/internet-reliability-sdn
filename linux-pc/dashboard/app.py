@@ -3,6 +3,8 @@ import logging
 import os
 import threading
 import time
+import urllib.request
+import urllib.error
 from datetime import datetime
 
 import paho.mqtt.client as mqtt
@@ -77,7 +79,7 @@ def _update_state(reading):
 # ── MQTT bridge ────────────────────────────────────────────────────────────────
 
 _mqtt_client = None
-_mqtt_reconnect = threading.Event()
+_mqtt_thread_stop = None
 
 
 def _on_connect(client, userdata, flags, rc):
@@ -135,7 +137,7 @@ def _on_message(client, userdata, msg):
     socketio.emit("telemetry", reading)
 
 
-def _mqtt_loop(broker, port):
+def _mqtt_loop(broker, port, stop_event):
     global _mqtt_client
     client = mqtt.Client()
     client.on_connect = _on_connect
@@ -143,21 +145,38 @@ def _mqtt_loop(broker, port):
     client.on_message = _on_message
     _mqtt_client = client
 
-    while True:
+    while not stop_event.is_set():
         try:
             client.connect(broker, port, keepalive=60)
             client.loop_forever()
         except Exception as exc:
+            if stop_event.is_set():
+                break
             logger.error("MQTT error: %s — retry in 5 s", exc)
             time.sleep(5)
 
 
 def start_mqtt():
+    global _mqtt_thread_stop
     broker = get_setting("mqtt_broker", "localhost")
     port = int(get_setting("mqtt_port", "1883"))
-    t = threading.Thread(target=_mqtt_loop, args=(broker, port), daemon=True)
+    _mqtt_thread_stop = threading.Event()
+    t = threading.Thread(target=_mqtt_loop, args=(broker, port, _mqtt_thread_stop), daemon=True)
     t.start()
     logger.info("MQTT thread started → %s:%d", broker, port)
+
+
+def restart_mqtt():
+    global _mqtt_thread_stop, _mqtt_client
+    if _mqtt_thread_stop:
+        _mqtt_thread_stop.set()
+    if _mqtt_client:
+        try:
+            _mqtt_client.disconnect()
+        except Exception:
+            pass
+    time.sleep(0.3)
+    start_mqtt()
 
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
@@ -221,6 +240,7 @@ def settings():
                 flash("Password updated.", "success")
 
         flash("Settings saved.", "success")
+        restart_mqtt()
         return redirect(url_for("settings"))
 
     s = {
@@ -253,6 +273,18 @@ def api_history(link_key):
 def api_logs():
     limit = request.args.get("limit", 100, type=int)
     return jsonify(get_recent_logs(limit=limit))
+
+
+@app.route("/api/sdn-status")
+@login_required
+def api_sdn_status():
+    ctrl = get_setting("controller_url", "http://localhost:8080")
+    try:
+        with urllib.request.urlopen(f"{ctrl}/zan/network-status", timeout=2) as r:
+            return jsonify(json.loads(r.read()))
+    except Exception as exc:
+        return jsonify({"error": str(exc), "connected_switches": [],
+                        "degraded_links": [], "mac_table": {}})
 
 
 # ── Socket.IO ──────────────────────────────────────────────────────────────────

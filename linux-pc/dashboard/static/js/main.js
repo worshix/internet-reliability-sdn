@@ -19,17 +19,24 @@ const ZAN = (() => {
   const gauges = {};   // id → gauge instance
 
   function initGauges() {
-    document.querySelectorAll('canvas[data-type]').forEach(el => {
+    document.querySelectorAll('canvas[data-type="radial-gauge"]').forEach(el => {
       const id = el.dataset.id;
       if (!id) return;
-      const g = new RadialGauge({ renderTo: el }).draw();
+      const g = new RadialGauge({
+        renderTo: el,
+        width:  parseInt(el.dataset.width  || 180),
+        height: parseInt(el.dataset.height || 180),
+      }).draw();
       gauges[id] = g;
     });
-    // linear-gauge (packet loss)
     document.querySelectorAll('canvas[data-type="linear-gauge"]').forEach(el => {
       const id = el.dataset.id;
       if (!id) return;
-      const g = new LinearGauge({ renderTo: el }).draw();
+      const g = new LinearGauge({
+        renderTo: el,
+        width:  parseInt(el.dataset.width  || 120),
+        height: parseInt(el.dataset.height || 200),
+      }).draw();
       gauges[id] = g;
     });
   }
@@ -131,6 +138,11 @@ const ZAN = (() => {
     if (linkHistory[lk].length > MAX_HISTORY) linkHistory[lk].shift();
 
     ensureLinkOption(lk);
+    if (!activeLink) {
+      activeLink = lk;
+      const sel = document.getElementById('link-select');
+      if (sel) sel.value = lk;
+    }
     if (activeLink === lk) updateCharts(lk);
 
     // Node card values
@@ -201,6 +213,58 @@ const ZAN = (() => {
     const lEl = document.getElementById('stat-links');
     if (nEl) nEl.textContent = nodes.size;
     if (lEl) lEl.textContent = Object.keys(linkHistory).length;
+  }
+
+  // ── SDN Topology ──────────────────────────────────────────────────────────
+  function updateSdnPanel(data) {
+    const connected = new Set(data.connected_switches || []);
+    const degraded  = data.degraded_links || [];
+    const macTable  = data.mac_table || {};
+
+    const degradedSw = new Set();
+    degraded.forEach(pair => { degradedSw.add(pair[0]); degradedSw.add(pair[1]); });
+
+    for (let i = 1; i <= 5; i++) {
+      const el      = document.getElementById(`sw-${i}`);
+      const hostsEl = document.getElementById(`sw-${i}-hosts`);
+      if (!el) continue;
+
+      if (!connected.has(i)) {
+        el.className = 'zan-switch-badge zan-sw-offline';
+        if (hostsEl) hostsEl.textContent = '';
+      } else if (degradedSw.has(i)) {
+        el.className = 'zan-switch-badge zan-sw-degraded';
+      } else {
+        el.className = 'zan-switch-badge zan-sw-online';
+      }
+
+      const macs = macTable[String(i)] || [];
+      if (hostsEl) hostsEl.textContent = macs.length ? ` (${macs.length}h)` : '';
+    }
+
+    const deg = document.getElementById('sdn-degraded');
+    if (deg) {
+      if (!degraded.length) {
+        deg.innerHTML = '<span class="zan-topo-none"><i class="bi bi-shield-check me-1"></i>None</span>';
+      } else {
+        deg.innerHTML = degraded.map(p =>
+          `<span class="zan-degraded-link"><i class="bi bi-exclamation-triangle-fill me-1"></i>s${p[0]} ↔ s${p[1]}</span>`
+        ).join('');
+      }
+    }
+
+    const ts = document.getElementById('sdn-last-poll');
+    if (ts) ts.textContent = new Date().toLocaleTimeString();
+  }
+
+  function pollSdnStatus() {
+    fetch('/api/sdn-status')
+      .then(r => r.json())
+      .then(data => updateSdnPanel(data))
+      .catch(() => {
+        const ts = document.getElementById('sdn-last-poll');
+        if (ts) ts.textContent = 'unreachable';
+      });
   }
 
   // ── Insight (AI alert) ────────────────────────────────────────────────────
@@ -328,11 +392,40 @@ const ZAN = (() => {
       initGauges();
       initCharts();
 
+      // Poll SDN topology every 5 s
+      pollSdnStatus();
+      setInterval(pollSdnStatus, 5000);
+
+      // Pre-populate links and load chart history from server state
+      fetch('/api/state')
+        .then(r => r.json())
+        .then(state => {
+          const links = Object.keys(state.links || {});
+          links.forEach(lk => ensureLinkOption(lk));
+          if (links.length && !activeLink) {
+            activeLink = links[0];
+            const sel = document.getElementById('link-select');
+            if (sel) sel.value = activeLink;
+            fetch('/api/history/' + encodeURIComponent(activeLink))
+              .then(r => r.json())
+              .then(hist => { linkHistory[activeLink] = hist; updateCharts(activeLink); });
+          }
+        })
+        .catch(() => {});
+
       const sel = document.getElementById('link-select');
       if (sel) {
         sel.addEventListener('change', () => {
           activeLink = sel.value;
-          if (activeLink) updateCharts(activeLink);
+          if (!activeLink) return;
+          if (linkHistory[activeLink] && linkHistory[activeLink].length) {
+            updateCharts(activeLink);
+          } else {
+            fetch('/api/history/' + encodeURIComponent(activeLink))
+              .then(r => r.json())
+              .then(hist => { linkHistory[activeLink] = hist; updateCharts(activeLink); })
+              .catch(() => {});
+          }
         });
       }
     },

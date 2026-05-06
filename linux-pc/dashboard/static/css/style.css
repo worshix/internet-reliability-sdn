@@ -278,5 +278,44 @@ canvas#chart-latency, canvas#chart-rssi { max-height: 220px; }
 ::-webkit-scrollbar-thumb { background: var(--zan-border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--zan-muted); }
 
+/* ── SDN Topology panel ──────────────────────────────────────────────────── */
+.zan-topo-label { font-size: 0.75rem; font-weight: 600; color: var(--zan-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.zan-topo-none  { font-size: 0.82rem; color: var(--zan-muted); }
+
+.zan-switch-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+  white-space: nowrap;
+}
+.zan-sw-online   { background: rgba(76,175,80,0.12);  border-color: #4caf50; color: #81c784; }
+.zan-sw-offline  { background: rgba(136,136,136,0.08); border-color: var(--zan-border); color: var(--zan-muted); }
+.zan-sw-degraded { background: rgba(244,67,54,0.12);  border-color: #f44336; color: #ef9a9a; animation: zan-pulse-red 2s infinite; }
+
+.zan-sw-hosts { font-size: 0.7rem; font-weight: 400; margin-left: 0.3rem; opacity: 0.8; }
+
+.zan-degraded-link {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(244,67,54,0.12);
+  border: 1px solid #f44336;
+  color: #ef9a9a;
+  border-radius: 6px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-right: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+/* ── Gauge canvas — fixed size so they don't stretch on value update ─────── */
+canvas[data-type="radial-gauge"]  { display: block; width: 180px !important; height: 180px !important; }
+canvas[data-type="linear-gauge"]  { display: block; width: 120px !important; height: 200px !important; }
+
 /* ── Animations ──────────────────────────────────────────────────────────── */
 @keyframes zan-fade-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }

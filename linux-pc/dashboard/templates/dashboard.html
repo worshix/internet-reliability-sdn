@@ -51,6 +51,39 @@
   </div>
 </div>
 
+<!-- ── SDN Topology ───────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="zan-card">
+      <div class="zan-card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-diagram-3-fill me-2"></i>SDN Topology</span>
+        <span id="sdn-last-poll" class="zan-health-meta">polling…</span>
+      </div>
+      <div class="zan-card-body">
+        <div class="row g-3">
+          <div class="col-12 col-md-8">
+            <div class="zan-topo-label">Switches</div>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              {% for i in range(1,6) %}
+              <div class="zan-switch-badge zan-sw-offline" id="sw-{{ i }}">
+                <i class="bi bi-router me-1"></i>s{{ i }}
+                <span class="zan-sw-hosts" id="sw-{{ i }}-hosts"></span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="zan-topo-label">Degraded Links</div>
+            <div id="sdn-degraded" class="mt-2">
+              <span class="zan-topo-none"><i class="bi bi-shield-check me-1"></i>None</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Gauges ─────────────────────────────────────────────────────────────── -->
 <div class="row g-3 mb-3">
   <div class="col-12">

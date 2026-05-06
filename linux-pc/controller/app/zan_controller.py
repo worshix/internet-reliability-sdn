@@ -218,6 +218,8 @@ class ZANController(app_manager.OSKenApp):
             'connected_switches': list(self.datapaths.keys()),
             'degraded_links': [list(lnk) for lnk in self.degraded_links],
             'recent_insights': self.insight_log[-10:],
+            'mac_table': {str(dpid): list(macs.keys())
+                          for dpid, macs in self.mac_to_port.items()},
         }
 
     # ── OpenFlow handlers ─────────────────────────────────────────────────────
