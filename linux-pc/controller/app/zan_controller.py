@@ -10,15 +10,15 @@ Extensions over Phase 2:
   - Degraded-port-aware flooding (selective explicit-port flood)
 """
 import json
+import threading
 from collections import defaultdict, deque
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from os_ken.base import app_manager
 from os_ken.controller import ofp_event
 from os_ken.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER, set_ev_cls
 from os_ken.ofproto import ofproto_v1_3
 from os_ken.lib.packet import packet, ethernet, ipv4, tcp, udp
-from os_ken.app.wsgi import WSGIApplication, ControllerBase, route
-from webob import Response
 
 from aqosrm import AQoSRM, classify_flow, QUEUE_INTERACTIVE
 from topology_map import LINK_MAP
@@ -61,42 +61,51 @@ def _bfs_path(src, dst, blocked):
     return None
 
 
-# ── REST API ──────────────────────────────────────────────────────────────────
+# ── REST API (plain HTTPServer thread — os-ken has no wsgi module) ────────────
 
-class ZANRestAPI(ControllerBase):
-    def __init__(self, req, link, data, **config):
-        super().__init__(req, link, data, **config)
-        self._app = data['zan_app']
+class ZANRestHandler(BaseHTTPRequestHandler):
+    """Handles /zan/insight, /zan/network-status, /zan/clear-degraded."""
+    zan_app = None  # set to ZANController instance after init
 
-    @route('insight', '/zan/insight', methods=['POST'])
-    def post_insight(self, req, **kwargs):
-        try:
-            body = json.loads(req.body)
-        except Exception:
-            return Response(status=400, content_type='application/json',
-                            body=json.dumps({'error': 'invalid JSON'}))
-        self._app.handle_insight(body)
-        return Response(content_type='application/json',
-                        body=json.dumps({'status': 'ok'}))
+    def log_message(self, fmt, *args):  # silence access logs
+        pass
 
-    @route('status', '/zan/network-status', methods=['GET'])
-    def get_status(self, req, **kwargs):
-        return Response(content_type='application/json',
-                        body=json.dumps(self._app.get_network_status()))
+    def _json(self, code, data):
+        body = json.dumps(data).encode()
+        self.send_response(code)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
-    @route('clear', '/zan/clear-degraded', methods=['POST'])
-    def clear_degraded(self, req, **kwargs):
-        self._app.degraded_links.clear()
-        self._app.logger.info("Degraded links cleared via REST")
-        return Response(content_type='application/json',
-                        body=json.dumps({'status': 'cleared'}))
+    def do_GET(self):
+        if self.path == '/zan/network-status':
+            self._json(200, self.zan_app.get_network_status())
+        else:
+            self._json(404, {'error': 'not found'})
+
+    def do_POST(self):
+        length = int(self.headers.get('Content-Length', 0))
+        raw = self.rfile.read(length)
+        if self.path == '/zan/insight':
+            try:
+                data = json.loads(raw)
+            except Exception:
+                self._json(400, {'error': 'invalid JSON'})
+                return
+            self.zan_app.handle_insight(data)
+            self._json(200, {'status': 'ok'})
+        elif self.path == '/zan/clear-degraded':
+            self.zan_app.degraded_links.clear()
+            self._json(200, {'status': 'cleared'})
+        else:
+            self._json(404, {'error': 'not found'})
 
 
 # ── Controller ────────────────────────────────────────────────────────────────
 
 class ZANController(app_manager.OSKenApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
-    _CONTEXTS = {'wsgi': WSGIApplication}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -106,7 +115,11 @@ class ZANController(app_manager.OSKenApp):
         self.degraded_links = set()   # set of frozenset({dpid_a, dpid_b})
         self.insight_log = []         # last 50 insights
 
-        kwargs['wsgi'].register(ZANRestAPI, {'zan_app': self})
+        ZANRestHandler.zan_app = self
+        rest_server = HTTPServer(('0.0.0.0', 8080), ZANRestHandler)
+        t = threading.Thread(target=rest_server.serve_forever, daemon=True)
+        t.start()
+        self.logger.info("REST API listening on :8080")
 
     # ── helpers ───────────────────────────────────────────────────────────────
 
