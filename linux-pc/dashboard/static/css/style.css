@@ -313,6 +313,20 @@ canvas#chart-latency, canvas#chart-rssi { max-height: 220px; }
   margin-bottom: 0.4rem;
 }
 
+/* ── Clear Degraded button ───────────────────────────────────────────────── */
+.zan-btn-clear {
+  background: transparent;
+  border: 1px solid var(--zan-border);
+  color: var(--zan-muted);
+  border-radius: 4px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.zan-btn-clear:hover { border-color: var(--zan-green); color: var(--zan-green); }
+.zan-btn-clear:disabled { opacity: 0.4; cursor: not-allowed; }
+
 /* ── Reroute badge (inside AI alert rows) ────────────────────────────────── */
 .zan-reroute-badge {
   display: inline-flex;

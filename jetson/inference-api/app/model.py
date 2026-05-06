@@ -113,6 +113,11 @@ class ZANAnomalyModel:
         if features is None:
             return 0.0, None
 
+        # Rule-based hard floor — fires regardless of Isolation Forest score
+        rule_type = classify_anomaly_type(readings)
+        if rule_type in ('RF_INTERFERENCE', 'LINK_FAILURE'):
+            return 1.0, rule_type
+
         # decision_function: positive = normal, negative = anomaly
         # Typical range ≈ −0.5 … +0.5  →  map to 0…1 confidence
         raw = float(self._clf.decision_function([features])[0])
@@ -120,6 +125,6 @@ class ZANAnomalyModel:
 
         anomaly_type = None
         if confidence > ANOMALY_THRESHOLD:
-            anomaly_type = classify_anomaly_type(readings)
+            anomaly_type = rule_type
 
         return confidence, anomaly_type

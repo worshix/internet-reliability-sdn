@@ -57,7 +57,12 @@
     <div class="zan-card">
       <div class="zan-card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-diagram-3-fill me-2"></i>SDN Topology</span>
-        <span id="sdn-last-poll" class="zan-health-meta">polling…</span>
+        <div class="d-flex align-items-center gap-2">
+          <span id="sdn-last-poll" class="zan-health-meta">polling…</span>
+          <button id="btn-clear-degraded" class="zan-btn-clear" title="Clear all degraded links">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Clear
+          </button>
+        </div>
       </div>
       <div class="zan-card-body">
         <div class="row g-3">

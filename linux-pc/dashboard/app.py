@@ -287,6 +287,18 @@ def api_logs():
     return jsonify(get_recent_logs(limit=limit))
 
 
+@app.route("/api/clear-degraded", methods=["POST"])
+@login_required
+def api_clear_degraded():
+    ctrl = get_setting("controller_url", "http://localhost:8080")
+    try:
+        req = urllib.request.Request(f"{ctrl}/zan/clear-degraded", method="POST")
+        with urllib.request.urlopen(req, timeout=2) as r:
+            return jsonify(json.loads(r.read()))
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 502
+
+
 @app.route("/api/sdn-status")
 @login_required
 def api_sdn_status():

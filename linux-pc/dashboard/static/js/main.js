@@ -267,6 +267,18 @@ const ZAN = (() => {
       });
   }
 
+  const btnClear = document.getElementById('btn-clear-degraded');
+  if (btnClear) {
+    btnClear.addEventListener('click', () => {
+      btnClear.disabled = true;
+      fetch('/api/clear-degraded', { method: 'POST' })
+        .then(r => r.json())
+        .then(() => pollSdnStatus())
+        .catch(() => {})
+        .finally(() => { btnClear.disabled = false; });
+    });
+  }
+
   // ── Insight (AI alert) ────────────────────────────────────────────────────
   function flashAffectedSwitches(degradedLinks) {
     const affected = new Set();
